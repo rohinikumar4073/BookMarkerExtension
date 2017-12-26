@@ -1,11 +1,12 @@
-suite('Array', function() {
-  setup(function() {
-    // ...
+suite('Bookmarker Links', function () {
+  setup(function () {
   });
 
-  suite('#should load the dom with suggeste links', function() {
-    test('No of links equal to json input', function() {
-      assert.equal(-1, [1,2,3].indexOf(4));
+  suite('#should load the dom with suggeste links', function () {
+    test('No of links equal to json input', function () {
+      let jsonData = ["https://www.google.com", "https://www.cricbuzz.com"];
+      loadLinks(jsonData, "mocha");
+      assert(document.getElementById("mocha").childElementCount, 2)
     });
   });
 });
