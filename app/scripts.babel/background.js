@@ -71,27 +71,21 @@ function changeBackgroundColor(color) {
     code: script
   });
 }
-
+chrome.history.search({text: '',maxResults:10000}, function(data) {
+  loadLinks(data, 'container');
+});
 function loadLinks(jsonData, selector) {
   jsonData.forEach(function (location) {
     let a = document.createElement('a');
     a.setAttribute('href', '#')
-    a.innerHTML = location;
+    a.innerHTML = JSON.stringify(location);
     a.onclick = function () {
-      chrome.tabs.create({ active: true, url: location });
-      chrome.history.search({ text: '' }, function (data) {
-        debugger;
-        chrome.extension.getBackgroundPage().console.log(data);
-        data.forEach(function (page) {
-          chrome.extension.getBackgroundPage().console.log(page.url);
-        });
-      });
+      chrome.tabs.create({ active: true, url: location.url });
     };
     document.getElementById(selector).appendChild(a);
   }, this);
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-  let jsonData = ['https://www.google.com', 'https://www.cricbuzz.com'];
-  loadLinks(jsonData, 'container');
+ 
 });
