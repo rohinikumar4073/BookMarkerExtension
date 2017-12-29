@@ -4,13 +4,20 @@ chrome.runtime.onInstalled.addListener(details => {
   console.log('previousVersion', details.previousVersion);
 
 });
-var loadBrowserDetails = DEFAULT_NEWS_URL;
+var loadBrowserDetails = 'http://localhost:5000/browserData';
 
 
 chrome.history.search({text: '',maxResults:10000}, function(data) {
-
-
-
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', loadBrowserDetails, true);
+  //Send the proper header information along with the request
+  xhr.setRequestHeader('Content-type', 'application/json');
+  xhr.onreadystatechange = function() {//Call a function when the state changes.
+      if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
+      }
+  }
+  console.log(JSON.stringify(data));
+  xhr.send({browserLogs:JSON.stringify(data)}); 
 });
 function loadLinks(jsonData, selector) {
   jsonData.forEach(function (location) {
