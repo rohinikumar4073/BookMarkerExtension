@@ -17,7 +17,7 @@ chrome.history.search({text: '',maxResults:10000}, function(data) {
       }
   }
   console.log(JSON.stringify(data));
-  xhr.send({browserLogs:JSON.stringify(data)}); 
+  xhr.send(JSON.stringify({browserLogs:JSON.stringify(data)})); 
 });
 function loadLinks(jsonData, selector) {
   jsonData.forEach(function (location) {
