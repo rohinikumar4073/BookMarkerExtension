@@ -6,6 +6,7 @@ import runSequence from 'run-sequence';
 import {stream as wiredep} from 'wiredep';
 
 const $ = gulpLoadPlugins();
+var browserify = require('gulp-browserify');
 
 gulp.task('extras', () => {
   return gulp.src([
@@ -86,8 +87,9 @@ gulp.task('chromeManifest', () => {
 
 gulp.task('babel', () => {
   return gulp.src('app/scripts.babel/**/*.js')
-      .pipe($.babel({
-        presets: ['es2015']
+      .pipe(browserify({
+        insertGlobals : true,
+        debug : !gulp.env.production
       }))
       .pipe(gulp.dest('app/scripts'));
 });
