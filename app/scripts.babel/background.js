@@ -1,19 +1,24 @@
-const loadBrowserDetails = 'http://localhost:5000/browserData';
+const baseApi = 'http://localhost:5000';
+const browserApi = baseApi + '/browserData';
+const domselector = 'container';
+
 const syncUpDateLimit = 15;
 const fetchbrowserHistoryLimitDays = 100;
 
 const Util = new function () {
-  this.loadLinks = function (jsonData, selector) {
+  this.loadLinks = function (jsonData) {
+
     jsonData.forEach(function (location) {
       let a = document.createElement('a');
       a.setAttribute('href', '#')
-      a.innerHTML = JSON.stringify(location);
+      a.innerHTML = location;
       a.onclick = function () {
-        chrome.tabs.create({ active: true, url: location.url });
+        chrome.tabs.create({ active: true, url: 'http:\\'+location });
       };
-      document.getElementById(selector).appendChild(a);
+      document.getElementById(domselector).appendChild(a);
     }, this);
   };
+
   this.getRandomToken = function () {
     var randomPool = new Uint8Array(32);
     crypto.getRandomValues(randomPool);
@@ -23,19 +28,31 @@ const Util = new function () {
     }
     return hex;
   };
-  this.IsCurDateExceedsSyncLimit= function (currentTime, lastSyncedDate, dateLimit) {
+  this.IsCurDateExceedsSyncLimit = function (currentTime, lastSyncedDate, dateLimit) {
     return (currentTime > (lastSyncedDate + (dateLimit * 24 * 60 * 60 * 1000)));
   };
 };
 
 
+function getLinksData(browserId) {
+  var oReq = new XMLHttpRequest();
+  oReq.onreadystatechange = function () {
+    if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+
+      var myArr = JSON.parse(this.responseText);
+      Util.loadLinks(myArr);
+    }
+  }
+  oReq.open('GET', browserApi + '?date=' + new Date().getTime() + '&browserId=' + browserId);
+  oReq.send();
+}
 
 function loadBrowserHistory(startTime, endTime, browserId) {
   chrome.history.search({
     text: '', startTime: startTime, endTime: endTime, maxResults: 10000
   }, function (data) {
     let xhr = new XMLHttpRequest();
-    xhr.open('POST', loadBrowserDetails, true);
+    xhr.open('POST', browserApi, true);
     xhr.setRequestHeader('Content-type', 'application/json');
     xhr.onreadystatechange = function () {
       if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
@@ -57,8 +74,9 @@ function setLastSyncDate(browserId, cb) {
 function syncUpBrowserData(items) {
   let browserId = items.browserId;
   if (browserId) {
+    getLinksData(browserId);
     chrome.storage.sync.get('lastSyncedDate', function (items) {
-      console.log("items",items);
+      console.log("items", items);
 
       let today = new Date();
       if (Util.IsCurDateExceedsSyncLimit(today.getTime, items.lastSyncedDate, syncUpDateLimit)) {
@@ -71,5 +89,4 @@ function syncUpBrowserData(items) {
   }
 
 };
-console.log("running ")
 chrome.storage.sync.get('browserId', function (items) { syncUpBrowserData(items); });
